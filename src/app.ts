@@ -2,6 +2,9 @@ class ProjectInput {
   template: HTMLTemplateElement;
   host: HTMLDivElement;
   element: HTMLFormElement;
+  titleInput: HTMLInputElement;
+  description: HTMLTextAreaElement;
+  people: HTMLInputElement;
 
   constructor() {
     this.template = document.getElementById(
@@ -12,6 +15,19 @@ class ProjectInput {
     this.element = importedNode.firstElementChild! as HTMLFormElement;
     this.element.id = "user-input";
     this.attach();
+
+    this.titleInput = document.getElementById("title")! as HTMLInputElement;
+    this.description = document.getElementById(
+      "description"
+    )! as HTMLTextAreaElement;
+    this.people = document.getElementById("people")! as HTMLInputElement;
+
+    this.element.addEventListener("submit", (event: Event) => {
+      event.preventDefault();
+      console.log(this.titleInput.value);
+      console.log(this.description.value);
+      console.log(this.people.value);
+    });
   }
 
   private attach() {
