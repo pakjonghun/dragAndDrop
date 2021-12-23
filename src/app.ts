@@ -1,3 +1,41 @@
+type UserInput = [string, string, number];
+
+type validates = {
+  value: string | number;
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  gt?: number;
+};
+
+function validateFunc({ value, ...args }: validates): boolean {
+  let result = true;
+  const valueLength = value.toString().trim().length;
+  for (const key in args) {
+    switch (key) {
+      case "required":
+        if (args.required) result = !!valueLength;
+        break;
+      case "minLength":
+        if (typeof args.minLength === "number" && args.minLength >= 0)
+          result = valueLength >= args.minLength;
+        break;
+      case "maxLength":
+        if (typeof args.maxLength === "number" && args.maxLength >= 0)
+          result = valueLength <= args.maxLength;
+        break;
+      case "gt":
+        if (typeof args.gt === "number" && typeof value === "number")
+          result = value > args.gt;
+        break;
+      default:
+        throw new Error("올바른 유효성검사 타입을 입력하세요 ");
+    }
+    if (!result) return result;
+  }
+  return result;
+}
+
 class ProjectInput {
   template: HTMLTemplateElement;
   host: HTMLDivElement;
@@ -28,9 +66,27 @@ class ProjectInput {
   @AutoBind
   private submitHandle(event: Event) {
     event.preventDefault();
-    console.log(this.titleInput.value);
-    console.log(this.description.value);
-    console.log(this.people.value);
+    const userInput = this.getUserInput();
+    console.log(userInput);
+    this.cleanInput();
+  }
+
+  private cleanInput() {
+    this.titleInput.value = "";
+    this.description.value = "";
+    this.people.value = "";
+  }
+
+  private getUserInput(): UserInput | string {
+    const title = this.titleInput.value;
+    const description = this.description.value;
+    const people = +this.people.value;
+    const result =
+      validateFunc({ value: title, required: true, maxLength: 5 }) &&
+      validateFunc({ value: description, required: true, minLength: 5 }) &&
+      validateFunc({ value: people, gt: 5, required: true });
+
+    return result ? [title, description, people] : "유효성 검사 실패";
   }
 
   private configure() {
