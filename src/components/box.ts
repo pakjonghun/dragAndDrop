@@ -4,7 +4,7 @@ import { Component, IComponent } from "./component.js";
 export type ListenerObserver = (state: DragState, drag: IBox) => void;
 export interface IBox extends IComponent {
   setListenerCallback: ListenerObserver;
-  toggleClass(className: string): void;
+  addClass(className: string): void;
   removeClass(className: string): void;
   getY(): number;
 }
@@ -40,8 +40,8 @@ export class Box extends Component implements IBox {
     this.listenerObserver && this.listenerObserver(state, this);
   }
 
-  toggleClass(className: string) {
-    this.element.classList.toggle(className);
+  addClass(className: string) {
+    this.element.classList.add(className);
   }
 
   removeClass(className: string) {

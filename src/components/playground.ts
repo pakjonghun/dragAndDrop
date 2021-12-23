@@ -35,21 +35,24 @@ export class Playground extends Component implements IPlayground {
       case "end":
         this.drag?.removeClass("black");
         this.target?.removeClass("black");
+        drag.removeClass("drag");
         this.drag = null;
         this.target = null;
+        this.boxs.forEach((box) => box.addClass("overing"));
         break;
       case "enter":
         this.target = drag;
-        drag.toggleClass("black");
+        drag.addClass("black");
         break;
       case "leave":
-        drag.toggleClass("black");
+        drag.removeClass("black");
         this.target = null;
         break;
       case "start":
         this.drag = drag;
-        drag.toggleClass("blue");
-        this.boxs.forEach((box) => box.toggleClass("overing"));
+        drag.addClass("blue");
+        drag.addClass("drag");
+        this.boxs.forEach((box) => box.addClass("overing"));
         break;
       default:
         throw new Error("error");
