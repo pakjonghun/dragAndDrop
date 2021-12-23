@@ -1,17 +1,22 @@
-import { Playground } from "./components/playground.js";
-import { Box } from "./components/box.js";
-class App {
-  private readonly root: HTMLElement;
-  constructor(root: HTMLElement) {
-    this.root = root;
-    const playGround = new Playground();
-    playGround.attachTo(this.root);
+class ProjectInput {
+  template: HTMLTemplateElement;
+  host: HTMLDivElement;
+  element: HTMLFormElement;
 
-    const addButton = document.getElementById("addBox")! as HTMLButtonElement;
-    addButton.addEventListener("click", () => {
-      playGround.addChild(Box);
-    });
+  constructor() {
+    this.template = document.getElementById(
+      "project-input"
+    )! as HTMLTemplateElement;
+    this.host = document.getElementById("app")! as HTMLDivElement;
+    const importedNode = document.importNode(this.template.content, true);
+    this.element = importedNode.firstElementChild! as HTMLFormElement;
+    this.element.id = "user-input";
+    this.attach();
+  }
+
+  private attach() {
+    this.host.insertAdjacentElement("afterbegin", this.element);
   }
 }
 
-new App(document.getElementById("root")! as HTMLElement);
+const Project = new ProjectInput();
