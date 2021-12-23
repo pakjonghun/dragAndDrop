@@ -32,6 +32,7 @@ class ProjectInput {
     console.log(this.people.value);
   }
 
+  @AutoBind
   private configure() {
     this.element.addEventListener("submit", this.submitHandle);
   }
@@ -42,3 +43,19 @@ class ProjectInput {
 }
 
 const Project = new ProjectInput();
+
+function AutoBind(
+  target: any,
+  __: string,
+  propertyDescriptor: PropertyDescriptor
+) {
+  const origin = propertyDescriptor.value;
+  const newOrigin: PropertyDescriptor = {
+    enumerable: true,
+    configurable: true,
+    get() {
+      origin.bind(target);
+    },
+  };
+  return newOrigin;
+}
