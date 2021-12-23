@@ -22,12 +22,18 @@ class ProjectInput {
     )! as HTMLTextAreaElement;
     this.people = document.getElementById("people")! as HTMLInputElement;
 
-    this.element.addEventListener("submit", (event: Event) => {
-      event.preventDefault();
-      console.log(this.titleInput.value);
-      console.log(this.description.value);
-      console.log(this.people.value);
-    });
+    this.configure();
+  }
+
+  private submitHandle(event: Event) {
+    event.preventDefault();
+    console.log(this.titleInput.value);
+    console.log(this.description.value);
+    console.log(this.people.value);
+  }
+
+  private configure() {
+    this.element.addEventListener("submit", this.submitHandle);
   }
 
   private attach() {
