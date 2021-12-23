@@ -25,6 +25,7 @@ class ProjectInput {
     this.configure();
   }
 
+  @AutoBind
   private submitHandle(event: Event) {
     event.preventDefault();
     console.log(this.titleInput.value);
@@ -32,7 +33,6 @@ class ProjectInput {
     console.log(this.people.value);
   }
 
-  @AutoBind
   private configure() {
     this.element.addEventListener("submit", this.submitHandle);
   }
@@ -44,18 +44,15 @@ class ProjectInput {
 
 const Project = new ProjectInput();
 
-function AutoBind(
-  target: any,
-  __: string,
-  propertyDescriptor: PropertyDescriptor
-) {
+//deco
+function AutoBind(_: any, __: string, propertyDescriptor: PropertyDescriptor) {
   const origin = propertyDescriptor.value;
-  const newOrigin: PropertyDescriptor = {
-    enumerable: true,
+  const adjDesporitor: PropertyDescriptor = {
     configurable: true,
     get() {
-      origin.bind(target);
+      const temp = origin.bind(this);
+      return temp;
     },
   };
-  return newOrigin;
+  return adjDesporitor;
 }
