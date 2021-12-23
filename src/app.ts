@@ -9,12 +9,7 @@ class App {
 
     const addButton = document.getElementById("addBox")! as HTMLButtonElement;
     addButton.addEventListener("click", () => {
-      const box = new Box("red");
-      playGround.addChild(box);
-    });
-
-    this.root.addEventListener("drop", () => {
-      console.log(1);
+      playGround.addChild(Box);
     });
   }
 }

@@ -1,7 +1,7 @@
 import { Colors, DragState } from "./type.js";
 import { Component, IComponent } from "./component.js";
 
-type ListenerObserver = (state: DragState) => void;
+export type ListenerObserver = (state: DragState, drag: IBox) => void;
 export interface IBox extends IComponent {
   setListenerCallback: ListenerObserver;
 }
@@ -34,7 +34,6 @@ export class Box extends Component implements IBox {
   }
 
   private dragListener(state: DragState) {
-    this.listenerObserver && this.listenerObserver(state);
-    console.log(state);
+    this.listenerObserver && this.listenerObserver(state, this);
   }
 }
