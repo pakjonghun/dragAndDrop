@@ -4,6 +4,9 @@ import { Component, IComponent } from "./component.js";
 export type ListenerObserver = (state: DragState, drag: IBox) => void;
 export interface IBox extends IComponent {
   setListenerCallback: ListenerObserver;
+  toggleClass(className: string): void;
+  removeClass(className: string): void;
+  getY(): number;
 }
 export class Box extends Component implements IBox {
   private listenerObserver?: ListenerObserver;
@@ -35,5 +38,17 @@ export class Box extends Component implements IBox {
 
   private dragListener(state: DragState) {
     this.listenerObserver && this.listenerObserver(state, this);
+  }
+
+  toggleClass(className: string) {
+    this.element.classList.toggle(className);
+  }
+
+  removeClass(className: string) {
+    this.element.classList.remove(className);
+  }
+
+  getY(): number {
+    return this.element.getBoundingClientRect().y;
   }
 }

@@ -34,16 +34,22 @@ body {
   cursor: pointer;
 }
 
-.blue {
-  background-color: skyblue;
-}
-
+.blue,
+.red,
 .black {
-  background-color: black;
+  display: block;
 }
 
 .red {
   background-color: tomato;
+}
+
+.blue {
+  background-color: blue;
+}
+
+.black {
+  background-color: black;
 }
 
 #addBox {
@@ -55,6 +61,6 @@ body {
   font-size: 1.2rem;
 }
 
-.overing {
+.overing * {
   pointer-events: none;
 }

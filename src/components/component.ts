@@ -1,6 +1,7 @@
 export interface IComponent {
   attachTo(parent: HTMLElement, position?: InsertPosition): void;
   removeFrom(parent: HTMLElement): void;
+  attach(target: IComponent, position: InsertPosition): void;
 }
 
 export class Component implements IComponent {
@@ -18,5 +19,9 @@ export class Component implements IComponent {
 
   removeFrom(parent: HTMLElement) {
     parent.removeChild(this.element);
+  }
+
+  attach(target: IComponent, position: InsertPosition) {
+    target.attachTo(this.element, position);
   }
 }
