@@ -1,8 +1,11 @@
 import { Colors, DragState } from "./type.js";
-import { Component } from "./component.js";
+import { Component, IComponent } from "./component.js";
 
 type ListenerObserver = (state: DragState) => void;
-export class Box extends Component {
+export interface IBox extends IComponent {
+  setListenerCallback: ListenerObserver;
+}
+export class Box extends Component implements IBox {
   private listenerObserver?: ListenerObserver;
   constructor(color: Colors) {
     super(`<div class="box" draggable="true"></div>`);
@@ -20,14 +23,18 @@ export class Box extends Component {
     this.element.addEventListener("dragleave", () => {
       this.dragListener("leave");
     });
+
+    this.element.addEventListener("dragover", (event: DragEvent) => {
+      event.preventDefault();
+    });
   }
 
   set setListenerCallback(func: ListenerObserver) {
     this.listenerObserver = func;
   }
 
-  private dragListener(dragState: DragState) {
-    console.log(dragState);
-    this.listenerObserver && this.listenerObserver(dragState);
+  private dragListener(state: DragState) {
+    this.listenerObserver && this.listenerObserver(state);
+    console.log(state);
   }
 }

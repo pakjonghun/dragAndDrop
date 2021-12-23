@@ -1,5 +1,5 @@
 export interface IComponent {
-  attachTo(parent: HTMLElement, position: InsertPosition): void;
+  attachTo(parent: HTMLElement, position?: InsertPosition): void;
   removeFrom(parent: HTMLElement): void;
 }
 
