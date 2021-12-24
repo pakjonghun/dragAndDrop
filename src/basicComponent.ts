@@ -6,12 +6,17 @@ export abstract class BasicComponent<
   protected host: H;
   protected element: E;
 
-  constructor(id: string, position: InsertPosition) {
-    this.template = document.getElementById(id)! as HTMLTemplateElement;
-    this.host = document.getElementById("app")! as H;
+  constructor(
+    templateId: string,
+    hostId: string,
+    position: InsertPosition,
+    elementId: string
+  ) {
+    this.template = document.getElementById(templateId)! as HTMLTemplateElement;
     const importedNode = document.importNode(this.template.content, true);
     this.element = importedNode.firstElementChild! as E;
-
+    this.host = document.getElementById(hostId)! as H;
+    this.element.id = elementId;
     this.attach(position);
   }
 

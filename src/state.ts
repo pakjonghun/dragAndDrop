@@ -1,12 +1,29 @@
 import { Project } from "./project.js";
 
-type StateListener = (arg: Project[]) => void;
+type StateListener<T> = (arg: T[]) => void;
 
-export class ManageState {
-  private state: Project[] = [];
-  private listenerFuncs: StateListener[] = [];
+class BaseState<T> {
+  protected state: T[] = [];
+  protected listenerFuncs: StateListener<T>[] = [];
+
+  addState(newState: T) {
+    this.state.push(newState);
+
+    for (const func of this.listenerFuncs) {
+      func(this.state.slice());
+    }
+  }
+
+  addListener(func: StateListener<T>) {
+    this.listenerFuncs.push(func);
+  }
+}
+
+export class ManageState extends BaseState<Project> {
   static instance: ManageState;
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
   static getInstance() {
     if (!this.instance) {
@@ -15,17 +32,5 @@ export class ManageState {
     }
 
     return this.instance;
-  }
-
-  addState(newState: Project) {
-    this.state.push(newState);
-
-    for (const func of this.listenerFuncs) {
-      func(this.state.slice());
-    }
-  }
-
-  addListener(func: StateListener) {
-    this.listenerFuncs.push(func);
   }
 }

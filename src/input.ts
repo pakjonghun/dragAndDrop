@@ -13,8 +13,7 @@ export class ProjectInput
   implements IProjectInput
 {
   constructor() {
-    super("project-input", "afterbegin");
-    this.element.id = "user-input";
+    super("project-input", "app", "afterbegin", "user-input");
     this.configure();
   }
 

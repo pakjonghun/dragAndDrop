@@ -12,17 +12,23 @@ enum ProjectStatus {
 export type Status = keyof typeof ProjectStatus;
 
 export interface IProjectList
-  extends BasicComponent<HTMLUListElement, HTMLDivElement> {
+  extends BasicComponent<HTMLDivElement, HTMLUListElement> {
   renderList(): void;
 }
 
+// class RenderItem extends BasicComponent<HTMLUListElement, HTMLLIElement> {
+//   constructor(itemId: string, elementId: string) {
+//     super("single-project", itemId, "afterbegin", elementId);
+//   }
+// }
+
 class ProjectList
-  extends BasicComponent<HTMLUListElement, HTMLDivElement>
+  extends BasicComponent<HTMLDivElement, HTMLUListElement>
   implements IProjectList
 {
   private assignedState: Project[] = [];
   constructor(private type: Status) {
-    super("project-list", "beforeend");
+    super("project-list", "app", "beforeend", `${type}-project-list`);
     this.renderList();
 
     ManageState.getInstance().addListener(this.listener);
@@ -45,8 +51,6 @@ class ProjectList
   }
 
   renderList() {
-    const listId = `${this.type}-project-list`;
-    this.element.querySelector("ul")!.id = listId;
     this.element.querySelector(
       "h2"
     )!.textContent = `${this.type.toUpperCase()}-PROJECTS`;
