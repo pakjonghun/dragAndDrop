@@ -1,197 +1,130 @@
-type UserInput = [string, string, number];
-
-type validates = {
+import { BasicComponent } from "./basicComponent.js";
+import { AutoBind } from "./desorator.js";
+function validate({
+  value,
+  ...rest
+}: {
   value: string | number;
   required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  gt?: number;
-};
-
-function validateFunc({ value, ...args }: validates): boolean {
+  max?: number;
+  min?: number;
+}): boolean {
   let result = true;
   const valueLength = value.toString().trim().length;
-  for (const key in args) {
+  for (const key in rest) {
     switch (key) {
       case "required":
-        if (args.required) result = !!valueLength;
+        if (rest.required) result = !!valueLength;
         break;
-      case "minLength":
-        if (typeof args.minLength === "number" && args.minLength >= 0)
-          result = valueLength >= args.minLength;
+      case "max":
+        if (rest.max! >= 0) result = valueLength < rest.max!;
         break;
-      case "maxLength":
-        if (typeof args.maxLength === "number" && args.maxLength >= 0)
-          result = valueLength <= args.maxLength;
-        break;
-      case "gt":
-        if (typeof args.gt === "number" && typeof value === "number")
-          result = value > args.gt;
+      case "min":
+        if (rest.min! >= 0) result = valueLength >= rest.min!;
         break;
       default:
-        alert("유효성 검사 실패");
-        throw new Error("올바른 유효성검사 타입을 입력하세요 ");
+        throw new Error("타입이 맞지 않습니다.");
     }
-    if (!result) return result;
+    if (!result) return false;
   }
   return result;
 }
 
 class ManageState {
-  private listener: any[] = [];
-  private projects: any[] = [];
-  private static instance: ManageState;
+  private state: any[] = [];
+  private listenerFuncs: any[] = [];
+  static instance: ManageState;
+  private constructor() {}
 
   static getInstance() {
-    if (this.instance) return this.instance;
-    this.instance = new ManageState();
+    if (!this.instance) {
+      this.instance = new ManageState();
+      return this.instance;
+    }
+
     return this.instance;
   }
 
-  addListener(listenerFunc: Function) {
-    this.listener.push(listenerFunc);
-  }
+  addState(newState: {
+    id: string;
+    title: string;
+    desc: string;
+    people: number;
+  }) {
+    this.state.push(newState);
 
-  addProject(title: string, desc: string, people: number) {
-    const id = `${Math.random() * 1000}_${Date.now()}`;
-    this.projects.push({ id, title, desc, people });
-
-    for (const listenerFn of this.listener) {
-      listenerFn(this.projects.slice());
+    for (const func of this.listenerFuncs) {
+      func(this.state.slice());
     }
   }
 
-  get getProject() {
-    return this.projects;
-  }
-
-  deleteById(id: string) {
-    this.projects = this.projects.filter((item) => item.id !== id);
+  addListener(func: Function) {
+    this.listenerFuncs.push(func);
   }
 }
 
-class ProjectInput {
-  private template: HTMLTemplateElement;
-  private host: HTMLDivElement;
-  private element: HTMLFormElement;
-  private titleInput: HTMLInputElement;
-  private description: HTMLTextAreaElement;
-  private people: HTMLInputElement;
+class ProjectList extends BasicComponent {
+  private assignedState: any[] = [];
+  constructor(private type: "active" | "finished") {
+    super("project-list", "beforeend");
+    this.renderList();
 
+    ManageState.getInstance().addListener(this.listener);
+  }
+
+  private listener(state: any[]) {
+    this.assignedState = state;
+    this.renderItem();
+  }
+
+  private renderItem() {
+    for (const item of this.assignedState) {
+      const li = document.createElement("li")!;
+      li.textContent = item.title;
+    }
+  }
+
+  private renderList() {
+    const listId = `${this.type}-project-list`;
+    this.element.querySelector("ul")!.id = listId;
+    this.element.querySelector(
+      "h2"
+    )!.textContent = `${this.type.toUpperCase()}-PROJECTS`;
+  }
+}
+
+class ProjectInput extends BasicComponent {
   constructor() {
-    this.template = document.getElementById(
-      "project-input"
-    )! as HTMLTemplateElement;
-    this.host = document.getElementById("app")! as HTMLDivElement;
-    const importedNode = document.importNode(this.template.content, true);
-    this.element = importedNode.firstElementChild! as HTMLFormElement;
+    super("project-input", "afterbegin");
     this.element.id = "user-input";
-    this.attach();
-
-    this.titleInput = document.getElementById("title")! as HTMLInputElement;
-    this.description = document.getElementById(
-      "description"
-    )! as HTMLTextAreaElement;
-    this.people = document.getElementById("people")! as HTMLInputElement;
-
     this.configure();
   }
 
   @AutoBind
-  private submitHandle(event: Event) {
+  private handleSubmit(event: Event) {
     event.preventDefault();
-    const data = this.getUserInput();
-    if (!data) return;
-    projectState.addProject(data[0], data[1], data[2]);
-    this.cleanInput();
+    const inputValues = this.getInput();
+    if (!inputValues) return;
   }
 
-  private cleanInput() {
-    this.titleInput.value = "";
-    this.description.value = "";
-    this.people.value = "";
-  }
+  private getInput(): [string, string, number] | void {
+    const title = this.element.querySelector("#title")! as HTMLInputElement;
+    const description = this.element.querySelector(
+      "#description"
+    )! as HTMLInputElement;
+    const people = this.element.querySelector("#people")! as HTMLInputElement;
 
-  private getUserInput(): UserInput | void {
-    const title = this.titleInput.value;
-    const description = this.description.value;
-    const people = +this.people.value;
     const result =
-      validateFunc({ value: title, required: true, maxLength: 5 }) &&
-      validateFunc({ value: description, required: true, minLength: 5 }) &&
-      validateFunc({ value: people, gt: 5, required: true });
+      validate({ value: title.value, required: true }) &&
+      validate({ value: description.value, required: true }) &&
+      validate({ value: people.value, required: true });
 
-    return result ? [title, description, people] : alert("유효성 검사 실패");
+    if (!result) return alert("유효성 검사 실패");
+    return [title.value, description.value, +people.value];
   }
 
   private configure() {
-    this.element.addEventListener("submit", this.submitHandle);
-  }
-
-  private attach() {
-    this.host.insertAdjacentElement("afterbegin", this.element);
-  }
-}
-
-//deco
-function AutoBind(_: any, __: string, propertyDescriptor: PropertyDescriptor) {
-  const origin = propertyDescriptor.value;
-  const adjDesporitor: PropertyDescriptor = {
-    configurable: true,
-    get() {
-      const temp = origin.bind(this);
-      return temp;
-    },
-  };
-  return adjDesporitor;
-}
-const projectState = ManageState.getInstance();
-class ProjectList {
-  private element: HTMLElement;
-  private template: HTMLTemplateElement;
-  private host: HTMLDivElement;
-  assignedProjects: any[];
-
-  constructor(private type: "active" | "finished") {
-    this.template = document.getElementById(
-      "project-list"
-    )! as HTMLTemplateElement;
-    this.host = document.getElementById("app")! as HTMLDivElement;
-    const importedNode = document.importNode(this.template.content, true);
-    this.element = importedNode.firstElementChild! as HTMLElement;
-    this.element.id = `${this.type}-projects`;
-    this.assignedProjects = [];
-
-    projectState.addListener((projects: any[]) => {
-      this.assignedProjects = projects;
-      this.renderProjects();
-    });
-
-    this.attach();
-    this.render();
-  }
-
-  private renderProjects() {
-    const listEl = document.getElementById(
-      `${this.type}-project-list`
-    )! as HTMLUListElement;
-    for (const item of this.assignedProjects) {
-      const listItem = document.createElement("li")!;
-      listItem.textContent = item.title;
-      listEl.appendChild(listItem);
-    }
-  }
-
-  attach() {
-    this.host.insertAdjacentElement("beforeend", this.element);
-  }
-
-  render() {
-    const listId = `${this.type}-project-list`;
-    this.element.querySelector(
-      "h2"
-    )!.textContent = `${this.type.toUpperCase()}-PROJECTS`;
-    this.element.querySelector("ul")!.id = listId;
+    this.element.addEventListener("submit", this.handleSubmit);
   }
 }
 
