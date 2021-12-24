@@ -33,11 +33,15 @@ class RenderItem
     this.renderList();
   }
 
+  get getPeople(): string {
+    const people = this.project.people;
+    return people > 1 ? `${people}s` : people.toString();
+  }
+
   renderList(): void {
     this.element.querySelector("h2")!.textContent = this.project.title;
     this.element.querySelector("p")!.textContent = this.project.description;
-    this.element.querySelector("h3")!.textContent =
-      this.project.people.toString();
+    this.element.querySelector("h3")!.textContent = this.getPeople;
   }
 }
 
