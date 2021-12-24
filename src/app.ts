@@ -93,8 +93,9 @@ class ProjectList extends BasicComponent {
   }
 
   private renderItem() {
+    const ul = this.element.querySelector("ul")!;
+    ul.innerHTML = "";
     for (const item of this.assignedState) {
-      const ul = this.element.querySelector("ul")!;
       const li = document.createElement("li")!;
       li.textContent = item.title;
       ul.prepend(li);
