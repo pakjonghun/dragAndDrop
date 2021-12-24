@@ -110,12 +110,7 @@ class ProjectList
   dropHandler(event: DragEvent): void {
     event.preventDefault();
     const id = event.dataTransfer!.getData("text/plain");
-
-    const isExist = this.assignedState.find((item) => item.id === id);
-    if (isExist) return alert("같은자리~");
-
-    ManageState.getInstance().editData(id);
-    this.renderItem();
+    ManageState.getInstance().editData(id, this.type);
   }
 
   @AutoBind

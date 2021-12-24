@@ -1,3 +1,4 @@
+import { Status } from "./app.js";
 import { Project } from "./project.js";
 
 type StateListener<T> = (arg: T[]) => void;
@@ -37,11 +38,12 @@ export class ManageState extends BaseState<Project> {
     }
   }
 
-  editData(id: string) {
+  editData(id: string, type: Status) {
     const item = this.state.find((item) => item.id === id);
-    if (!item) return alert("존재하지 않는 데이터 입니다.");
-    const curState = item.status === "Active" ? "Finished" : "Active";
-    item.status = curState;
-    this.listenerLoop();
+
+    if (item && item.status !== type) {
+      item.status = item.status === "Active" ? "Finished" : "Active";
+      this.listenerLoop();
+    }
   }
 }
