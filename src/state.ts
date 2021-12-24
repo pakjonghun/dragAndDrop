@@ -6,14 +6,6 @@ class BaseState<T> {
   protected state: T[] = [];
   protected listenerFuncs: StateListener<T>[] = [];
 
-  addState(newState: T) {
-    this.state.push(newState);
-
-    for (const func of this.listenerFuncs) {
-      func(this.state.slice());
-    }
-  }
-
   addListener(func: StateListener<T>) {
     this.listenerFuncs.push(func);
   }
@@ -34,10 +26,22 @@ export class ManageState extends BaseState<Project> {
     return this.instance;
   }
 
+  addState(newState: Project) {
+    this.state.push(newState);
+    this.listenerLoop();
+  }
+
+  private listenerLoop() {
+    for (const func of this.listenerFuncs) {
+      func(this.state.slice());
+    }
+  }
+
   editData(id: string) {
     const item = this.state.find((item) => item.id === id);
     if (!item) return alert("존재하지 않는 데이터 입니다.");
     const curState = item.status === "Active" ? "Finished" : "Active";
     item.status = curState;
+    this.listenerLoop();
   }
 }

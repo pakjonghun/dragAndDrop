@@ -93,18 +93,6 @@ class ProjectList
   }
 
   @AutoBind
-  dropHandler(event: DragEvent): void {
-    event.preventDefault();
-    const id = event.dataTransfer!.getData("text/plain");
-    const item = document.getElementById(id)!;
-    if (this.ul.id !== item.parentElement!.id) {
-      console.log(1);
-      ManageState.getInstance().editData(id);
-    }
-    this.ul.appendChild(item);
-  }
-
-  @AutoBind
   overHandler(event: DragEvent): void {
     event.preventDefault();
     if (event.dataTransfer!.types[0] === "text/plain") {
@@ -116,6 +104,18 @@ class ProjectList
   leaveHandler(event: DragEvent): void {
     event.preventDefault();
     this.ul.classList.remove("droppable");
+  }
+
+  @AutoBind
+  dropHandler(event: DragEvent): void {
+    event.preventDefault();
+    const id = event.dataTransfer!.getData("text/plain");
+
+    const isExist = this.assignedState.find((item) => item.id === id);
+    if (isExist) return alert("같은자리~");
+
+    ManageState.getInstance().editData(id);
+    this.renderItem();
   }
 
   @AutoBind
