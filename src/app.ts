@@ -97,13 +97,19 @@ class ProjectList
     event.preventDefault();
     const id = event.dataTransfer!.getData("text/plain");
     const item = document.getElementById(id)!;
+    if (this.ul.id !== item.parentElement!.id) {
+      console.log(1);
+      ManageState.getInstance().editData(id);
+    }
     this.ul.appendChild(item);
   }
 
   @AutoBind
   overHandler(event: DragEvent): void {
     event.preventDefault();
-    this.ul.classList.add("droppable");
+    if (event.dataTransfer!.types[0] === "text/plain") {
+      this.ul.classList.add("droppable");
+    }
   }
 
   @AutoBind

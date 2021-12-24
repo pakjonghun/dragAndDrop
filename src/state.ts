@@ -33,4 +33,11 @@ export class ManageState extends BaseState<Project> {
 
     return this.instance;
   }
+
+  editData(id: string) {
+    const item = this.state.find((item) => item.id === id);
+    if (!item) return alert("존재하지 않는 데이터 입니다.");
+    const curState = item.status === "Active" ? "Finished" : "Active";
+    item.status = curState;
+  }
 }
