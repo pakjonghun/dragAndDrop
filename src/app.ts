@@ -88,7 +88,7 @@ class ProjectList extends BasicComponent {
 
   @AutoBind
   private listener(state: Project[]) {
-    this.assignedState = state;
+    this.assignedState = state.filter((item) => item.status === this.type);
     this.renderItem();
   }
 
