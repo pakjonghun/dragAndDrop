@@ -16,19 +16,42 @@ export interface IProjectList
   renderList(): void;
 }
 
-// class RenderItem extends BasicComponent<HTMLUListElement, HTMLLIElement> {
-//   constructor(itemId: string, elementId: string) {
-//     super("single-project", itemId, "afterbegin", elementId);
-//   }
-// }
+export interface IRenderItem
+  extends BasicComponent<HTMLUListElement, HTMLLIElement> {
+  renderList(): void;
+}
+
+class RenderItem
+  extends BasicComponent<HTMLUListElement, HTMLLIElement>
+  implements IRenderItem
+{
+  private project: Project;
+  constructor(itemId: string, project: Project) {
+    super("single-project", itemId, "afterbegin", project.id);
+    this.project = project;
+
+    this.renderList();
+  }
+
+  renderList(): void {
+    this.element.querySelector("h2")!.textContent = this.project.title;
+    this.element.querySelector("p")!.textContent = this.project.description;
+    this.element.querySelector("h3")!.textContent =
+      this.project.people.toString();
+  }
+}
 
 class ProjectList
   extends BasicComponent<HTMLDivElement, HTMLUListElement>
   implements IProjectList
 {
   private assignedState: Project[] = [];
-  constructor(private type: Status) {
-    super("project-list", "app", "beforeend", `${type}-project-list`);
+  private ul: HTMLUListElement = this.element.querySelector("ul")!;
+  constructor(
+    private type: Status,
+    private constractor: { new (itemId: string, project: Project): IRenderItem }
+  ) {
+    super("project-list", "app", "beforeend", "");
     this.renderList();
 
     ManageState.getInstance().addListener(this.listener);
@@ -41,16 +64,16 @@ class ProjectList
   }
 
   private renderItem() {
-    const ul = this.element.querySelector("ul")!;
-    ul.innerHTML = "";
+    this.ul.innerHTML = "";
     for (const item of this.assignedState) {
-      const li = document.createElement("li")!;
-      li.textContent = item.title;
-      ul.prepend(li);
+      new this.constractor(this.ul.id, item);
     }
   }
 
   renderList() {
+    const listId = `${this.type}-projects-list`;
+    this.ul = this.element.querySelector("ul")! as HTMLUListElement;
+    this.ul.id = listId;
     this.element.querySelector(
       "h2"
     )!.textContent = `${this.type.toUpperCase()}-PROJECTS`;
@@ -58,5 +81,5 @@ class ProjectList
 }
 
 new ProjectInput();
-new ProjectList("Active");
-new ProjectList("Finished");
+new ProjectList("Active", RenderItem);
+new ProjectList("Finished", RenderItem);

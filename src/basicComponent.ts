@@ -10,13 +10,13 @@ export abstract class BasicComponent<
     templateId: string,
     hostId: string,
     position: InsertPosition,
-    elementId: string
+    elementId?: string
   ) {
     this.template = document.getElementById(templateId)! as HTMLTemplateElement;
     const importedNode = document.importNode(this.template.content, true);
     this.element = importedNode.firstElementChild! as E;
     this.host = document.getElementById(hostId)! as H;
-    this.element.id = elementId;
+    if (elementId) this.element.id = elementId;
     this.attach(position);
   }
 
