@@ -1,5 +1,5 @@
-import { Status } from "./app.js";
-import { Project } from "./project.js";
+import { Status } from "./app";
+import { Project } from "./project";
 
 type StateListener<T> = (arg: T[]) => void;
 

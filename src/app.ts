@@ -1,8 +1,8 @@
 import { BasicComponent } from "./basicComponent.js";
-import { AutoBind } from "./desorator.js";
-import { ProjectInput } from "./input.js";
-import { Project } from "./project.js";
-import { ManageState } from "./state.js";
+import { AutoBind } from "./desorator";
+import { ProjectInput } from "./input";
+import { Project } from "./project";
+import { ManageState } from "./state";
 
 enum ProjectStatus {
   "Active" = "Active",

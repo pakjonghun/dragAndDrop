@@ -1,7 +1,7 @@
-import { BasicComponent } from "./basicComponent.js";
-import { AutoBind } from "./desorator.js";
-import { Project } from "./project.js";
-import { ManageState } from "./state.js";
+import { BasicComponent } from "./basicComponent";
+import { AutoBind } from "./desorator";
+import { Project } from "./project";
+import { ManageState } from "./state";
 
 export interface IProjectInput
   extends BasicComponent<HTMLLIElement, HTMLDivElement> {
