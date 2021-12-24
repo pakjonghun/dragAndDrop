@@ -33,9 +33,11 @@ function validate({
 type StateListener = (arg: Project[]) => void;
 
 enum ProjectStatus {
-  "Active",
-  "Finished",
+  "Active" = "Active",
+  "Finished" = "Finished",
 }
+
+type Status = keyof typeof ProjectStatus;
 
 class Project {
   constructor(
@@ -43,7 +45,7 @@ class Project {
     public title: string,
     public description: string,
     public people: number,
-    public status: ProjectStatus
+    public status: Status
   ) {}
 }
 
@@ -77,7 +79,7 @@ class ManageState {
 
 class ProjectList extends BasicComponent {
   private assignedState: Project[] = [];
-  constructor(private type: "active" | "finished") {
+  constructor(private type: Status) {
     super("project-list", "beforeend");
     this.renderList();
 
@@ -127,7 +129,7 @@ class ProjectInput extends BasicComponent {
         title,
         description,
         people,
-        ProjectStatus.Active
+        "Active"
       )
     );
   }
@@ -154,5 +156,5 @@ class ProjectInput extends BasicComponent {
 }
 
 new ProjectInput();
-new ProjectList("active");
-new ProjectList("finished");
+new ProjectList("Active");
+new ProjectList("Finished");
