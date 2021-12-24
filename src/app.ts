@@ -29,6 +29,7 @@ function validateFunc({ value, ...args }: validates): boolean {
           result = value > args.gt;
         break;
       default:
+        alert("유효성 검사 실패");
         throw new Error("올바른 유효성검사 타입을 입력하세요 ");
     }
     if (!result) return result;
@@ -37,12 +38,12 @@ function validateFunc({ value, ...args }: validates): boolean {
 }
 
 class ProjectInput {
-  template: HTMLTemplateElement;
-  host: HTMLDivElement;
-  element: HTMLFormElement;
-  titleInput: HTMLInputElement;
-  description: HTMLTextAreaElement;
-  people: HTMLInputElement;
+  private template: HTMLTemplateElement;
+  private host: HTMLDivElement;
+  private element: HTMLFormElement;
+  private titleInput: HTMLInputElement;
+  private description: HTMLTextAreaElement;
+  private people: HTMLInputElement;
 
   constructor() {
     this.template = document.getElementById(
@@ -66,8 +67,7 @@ class ProjectInput {
   @AutoBind
   private submitHandle(event: Event) {
     event.preventDefault();
-    const userInput = this.getUserInput();
-    console.log(userInput);
+    if (!this.getUserInput()) return;
     this.cleanInput();
   }
 
@@ -77,7 +77,7 @@ class ProjectInput {
     this.people.value = "";
   }
 
-  private getUserInput(): UserInput | string {
+  private getUserInput(): UserInput | void {
     const title = this.titleInput.value;
     const description = this.description.value;
     const people = +this.people.value;
@@ -86,7 +86,7 @@ class ProjectInput {
       validateFunc({ value: description, required: true, minLength: 5 }) &&
       validateFunc({ value: people, gt: 5, required: true });
 
-    return result ? [title, description, people] : "유효성 검사 실패";
+    return result ? [title, description, people] : alert("유효성 검사 실패");
   }
 
   private configure() {
@@ -97,8 +97,6 @@ class ProjectInput {
     this.host.insertAdjacentElement("afterbegin", this.element);
   }
 }
-
-const Project = new ProjectInput();
 
 //deco
 function AutoBind(_: any, __: string, propertyDescriptor: PropertyDescriptor) {
@@ -112,3 +110,38 @@ function AutoBind(_: any, __: string, propertyDescriptor: PropertyDescriptor) {
   };
   return adjDesporitor;
 }
+
+class ProjectList {
+  private element: HTMLElement;
+  private template: HTMLTemplateElement;
+  private host: HTMLDivElement;
+  constructor(private type: "active" | "finished") {
+    this.template = document.getElementById(
+      "project-list"
+    )! as HTMLTemplateElement;
+    this.host = document.getElementById("app")! as HTMLDivElement;
+    const importedNode = document.importNode(this.template.content, true);
+    this.element = importedNode.firstElementChild! as HTMLElement;
+    this.element.id = `${this.type}-projects`;
+
+    this.attach();
+    this.render();
+  }
+
+  appProject() {}
+
+  attach() {
+    this.host.insertAdjacentElement("beforeend", this.element);
+  }
+
+  render() {
+    const listId = `${this.type}-project-list`;
+    this.element.querySelector(
+      "h2"
+    )!.textContent = `${this.type.toUpperCase()}-PROJECTS`;
+    this.element.querySelector("ul")!.id = listId;
+  }
+}
+new ProjectInput();
+new ProjectList("active");
+new ProjectList("finished");
