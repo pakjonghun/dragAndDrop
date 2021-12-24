@@ -1,4 +1,4 @@
-import { BasicComponent } from "./basicComponent.js";
+import { BasicComponent } from "./basicComponent";
 import { AutoBind } from "./desorator";
 import { ProjectInput } from "./input";
 import { Project } from "./project";
