@@ -30,9 +30,26 @@ function validate({
   return result;
 }
 
+type StateListener = (arg: Project[]) => void;
+
+enum ProjectStatus {
+  "Active",
+  "Finished",
+}
+
+class Project {
+  constructor(
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus
+  ) {}
+}
+
 class ManageState {
-  private state: any[] = [];
-  private listenerFuncs: any[] = [];
+  private state: Project[] = [];
+  private listenerFuncs: StateListener[] = [];
   static instance: ManageState;
   private constructor() {}
 
@@ -45,12 +62,7 @@ class ManageState {
     return this.instance;
   }
 
-  addState(newState: {
-    id: string;
-    title: string;
-    desc: string;
-    people: number;
-  }) {
+  addState(newState: Project) {
     this.state.push(newState);
 
     for (const func of this.listenerFuncs) {
@@ -58,13 +70,13 @@ class ManageState {
     }
   }
 
-  addListener(func: Function) {
+  addListener(func: StateListener) {
     this.listenerFuncs.push(func);
   }
 }
 
 class ProjectList extends BasicComponent {
-  private assignedState: any[] = [];
+  private assignedState: Project[] = [];
   constructor(private type: "active" | "finished") {
     super("project-list", "beforeend");
     this.renderList();
@@ -73,7 +85,7 @@ class ProjectList extends BasicComponent {
   }
 
   @AutoBind
-  private listener(state: any[]) {
+  private listener(state: Project[]) {
     this.assignedState = state;
     this.renderItem();
   }
@@ -108,13 +120,16 @@ class ProjectInput extends BasicComponent {
     event.preventDefault();
     const inputValues = this.getInput();
     if (!inputValues) return;
-    const [title, desc, people] = inputValues;
-    ManageState.getInstance().addState({
-      id: `${Math.random() * 1000}-${Date.now()}`,
-      title,
-      desc,
-      people,
-    });
+    const [title, description, people] = inputValues;
+    ManageState.getInstance().addState(
+      new Project(
+        `${Math.random() * 1000}-${Date.now()}`,
+        title,
+        description,
+        people,
+        ProjectStatus.Active
+      )
+    );
   }
 
   private getInput(): [string, string, number] | void {
