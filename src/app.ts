@@ -1,83 +1,25 @@
 import { BasicComponent } from "./basicComponent.js";
 import { AutoBind } from "./desorator.js";
-function validate({
-  value,
-  ...rest
-}: {
-  value: string | number;
-  required?: boolean;
-  max?: number;
-  min?: number;
-}): boolean {
-  let result = true;
-  const valueLength = value.toString().trim().length;
-  for (const key in rest) {
-    switch (key) {
-      case "required":
-        if (rest.required) result = !!valueLength;
-        break;
-      case "max":
-        if (rest.max! >= 0) result = valueLength < rest.max!;
-        break;
-      case "min":
-        if (rest.min! >= 0) result = valueLength >= rest.min!;
-        break;
-      default:
-        throw new Error("타입이 맞지 않습니다.");
-    }
-    if (!result) return false;
-  }
-  return result;
-}
-
-type StateListener = (arg: Project[]) => void;
+import { ProjectInput } from "./input.js";
+import { Project } from "./project.js";
+import { ManageState } from "./state.js";
 
 enum ProjectStatus {
   "Active" = "Active",
   "Finished" = "Finished",
 }
 
-type Status = keyof typeof ProjectStatus;
+export type Status = keyof typeof ProjectStatus;
 
-class Project {
-  constructor(
-    public id: string,
-    public title: string,
-    public description: string,
-    public people: number,
-    public status: Status
-  ) {}
+export interface IProjectList
+  extends BasicComponent<HTMLUListElement, HTMLDivElement> {
+  renderList(): void;
 }
 
-class ManageState {
-  private state: Project[] = [];
-  private listenerFuncs: StateListener[] = [];
-  static instance: ManageState;
-  private constructor() {}
-
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new ManageState();
-      return this.instance;
-    }
-
-    return this.instance;
-  }
-
-  addState(newState: Project) {
-    this.state.push(newState);
-
-    for (const func of this.listenerFuncs) {
-      func(this.state.slice());
-    }
-  }
-
-  addListener(func: StateListener) {
-    this.listenerFuncs.push(func);
-  }
-}
-
-class ProjectList extends BasicComponent {
+class ProjectList
+  extends BasicComponent<HTMLUListElement, HTMLDivElement>
+  implements IProjectList
+{
   private assignedState: Project[] = [];
   constructor(private type: Status) {
     super("project-list", "beforeend");
@@ -102,57 +44,12 @@ class ProjectList extends BasicComponent {
     }
   }
 
-  private renderList() {
+  renderList() {
     const listId = `${this.type}-project-list`;
     this.element.querySelector("ul")!.id = listId;
     this.element.querySelector(
       "h2"
     )!.textContent = `${this.type.toUpperCase()}-PROJECTS`;
-  }
-}
-
-class ProjectInput extends BasicComponent {
-  constructor() {
-    super("project-input", "afterbegin");
-    this.element.id = "user-input";
-    this.configure();
-  }
-
-  @AutoBind
-  private handleSubmit(event: Event) {
-    event.preventDefault();
-    const inputValues = this.getInput();
-    if (!inputValues) return;
-    const [title, description, people] = inputValues;
-    ManageState.getInstance().addState(
-      new Project(
-        `${Math.random() * 1000}-${Date.now()}`,
-        title,
-        description,
-        people,
-        "Active"
-      )
-    );
-  }
-
-  private getInput(): [string, string, number] | void {
-    const title = this.element.querySelector("#title")! as HTMLInputElement;
-    const description = this.element.querySelector(
-      "#description"
-    )! as HTMLInputElement;
-    const people = this.element.querySelector("#people")! as HTMLInputElement;
-
-    const result =
-      validate({ value: title.value, required: true }) &&
-      validate({ value: description.value, required: true }) &&
-      validate({ value: people.value, required: true });
-
-    if (!result) return alert("유효성 검사 실패");
-    return [title.value, description.value, +people.value];
-  }
-
-  private configure() {
-    this.element.addEventListener("submit", this.handleSubmit);
   }
 }
 

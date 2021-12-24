@@ -1,13 +1,16 @@
-export class BasicComponent {
+export abstract class BasicComponent<
+  H extends HTMLElement,
+  E extends HTMLElement
+> {
   protected template: HTMLTemplateElement;
-  protected host: HTMLElement;
-  protected element: HTMLElement;
+  protected host: H;
+  protected element: E;
 
   constructor(id: string, position: InsertPosition) {
     this.template = document.getElementById(id)! as HTMLTemplateElement;
-    this.host = document.getElementById("app")! as HTMLElement;
+    this.host = document.getElementById("app")! as H;
     const importedNode = document.importNode(this.template.content, true);
-    this.element = importedNode.firstElementChild! as HTMLElement;
+    this.element = importedNode.firstElementChild! as E;
 
     this.attach(position);
   }
