@@ -72,6 +72,7 @@ class ProjectList extends BasicComponent {
     ManageState.getInstance().addListener(this.listener);
   }
 
+  @AutoBind
   private listener(state: any[]) {
     this.assignedState = state;
     this.renderItem();
@@ -79,8 +80,10 @@ class ProjectList extends BasicComponent {
 
   private renderItem() {
     for (const item of this.assignedState) {
+      const ul = this.element.querySelector("ul")!;
       const li = document.createElement("li")!;
       li.textContent = item.title;
+      ul.prepend(li);
     }
   }
 
@@ -105,6 +108,13 @@ class ProjectInput extends BasicComponent {
     event.preventDefault();
     const inputValues = this.getInput();
     if (!inputValues) return;
+    const [title, desc, people] = inputValues;
+    ManageState.getInstance().addState({
+      id: `${Math.random() * 1000}-${Date.now()}`,
+      title,
+      desc,
+      people,
+    });
   }
 
   private getInput(): [string, string, number] | void {
