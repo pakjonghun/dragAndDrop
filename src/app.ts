@@ -16,22 +16,26 @@ export interface IProjectList
   renderList(): void;
 }
 
+interface IDraggable {
+  dragStartHandler(event: DragEvent): void;
+  dragEndHandler(event: DragEvent): void;
+}
+
+interface ITarget {
+  dropHandler(event: DragEvent): void;
+  overHandler(event: DragEvent): void;
+  leaveHandler(event: DragEvent): void;
+}
+
 export interface IRenderItem
   extends BasicComponent<HTMLUListElement, HTMLLIElement> {
   renderList(): void;
-  setObserver: Ovserver;
-  addClass: (className: string) => void;
-  removeClass: (className: string) => void;
 }
-
-type State = "start" | "end" | "leave" | "enter";
-type Ovserver = (state: State, item: IRenderItem) => void;
 
 class RenderItem
   extends BasicComponent<HTMLUListElement, HTMLLIElement>
-  implements IRenderItem
+  implements IRenderItem, IDraggable
 {
-  private observer?: Ovserver;
   private project: Project;
   constructor(itemId: string, project: Project) {
     super("single-project", itemId, "afterbegin", project.id);
@@ -39,42 +43,22 @@ class RenderItem
     this.element.draggable = true;
     this.renderList();
 
-    this.element.addEventListener("dragstart", () => {
-      this.listener("start");
-    });
-
-    this.element.addEventListener("dragend", () => {
-      this.listener("end");
-    });
-
-    this.element.addEventListener("dragenter", () => {
-      this.listener("enter");
-    });
-
-    this.element.addEventListener("dragleave", () => {
-      this.listener("leave");
-    });
+    this.element.addEventListener("dragend", this.dragEndHandler);
+    this.element.addEventListener("dragstart", this.dragStartHandler);
   }
 
-  addClass(className: string) {
-    this.element.classList.add(className);
-  }
+  @AutoBind
+  dragEndHandler(_: DragEvent): void {}
 
-  removeClass(className: string) {
-    this.element.classList.remove(className);
+  @AutoBind
+  dragStartHandler(event: DragEvent): void {
+    event.dataTransfer!.setData("text/plain", this.element.id);
+    // event.dataTransfer!.effectAllowed = "move";
   }
 
   get getPeople(): string {
     const people = this.project.people;
     return people > 1 ? `${people}s` : people.toString();
-  }
-
-  set setObserver(func: Ovserver) {
-    this.observer = func;
-  }
-
-  private listener(state: State) {
-    this.observer && this.observer(state, this);
   }
 
   renderList(): void {
@@ -86,11 +70,9 @@ class RenderItem
 
 class ProjectList
   extends BasicComponent<HTMLDivElement, HTMLUListElement>
-  implements IProjectList
+  implements IProjectList, ITarget
 {
   private lis = new Set<IRenderItem>();
-  private moving?: IRenderItem;
-  private target?: IRenderItem;
 
   private assignedState: Project[] = [];
   private ul: HTMLUListElement = this.element.querySelector("ul")!;
@@ -103,14 +85,31 @@ class ProjectList
 
     ManageState.getInstance().addListener(this.listener);
 
-    this.ul.addEventListener("drop", (event: DragEvent) => {
-      event.preventDefault();
-      console.log(this.moving, this.target);
-    });
+    this.ul.addEventListener("drop", this.dropHandler);
 
-    this.ul.addEventListener("dragover", (event: DragEvent) => {
-      event.preventDefault();
-    });
+    this.ul.addEventListener("dragover", this.overHandler);
+
+    this.ul.addEventListener("dragleave", this.leaveHandler);
+  }
+
+  @AutoBind
+  dropHandler(event: DragEvent): void {
+    event.preventDefault();
+    const id = event.dataTransfer!.getData("text/plain");
+    const item = document.getElementById(id)!;
+    this.ul.appendChild(item);
+  }
+
+  @AutoBind
+  overHandler(event: DragEvent): void {
+    event.preventDefault();
+    this.ul.classList.add("droppable");
+  }
+
+  @AutoBind
+  leaveHandler(event: DragEvent): void {
+    event.preventDefault();
+    this.ul.classList.remove("droppable");
   }
 
   @AutoBind
@@ -119,42 +118,11 @@ class ProjectList
     this.renderItem();
   }
 
-  private setMovingClass(className: string) {
-    this.lis.forEach((item) => item.addClass(className));
-  }
-
-  private removeMovingClass(className: string) {
-    this.lis.forEach((item) => item.removeClass(className));
-  }
-
-  @AutoBind
-  private observer(state: State, item: IRenderItem) {
-    switch (state) {
-      case "end":
-        this.removeMovingClass("moving");
-        this.moving = undefined;
-        break;
-      case "start":
-        this.setMovingClass("moving");
-        this.moving = item;
-        break;
-      case "leave":
-        this.target = undefined;
-        break;
-      case "enter":
-        this.target = item;
-        break;
-      default:
-        throw new Error("잘못된 상태 타입 입니다.");
-    }
-  }
-
   private renderItem() {
     this.ul.innerHTML = "";
     for (const item of this.assignedState) {
       const jtem = new this.constractor(this.ul.id, item);
       this.lis.add(jtem);
-      jtem.setObserver = this.observer;
     }
   }
 
